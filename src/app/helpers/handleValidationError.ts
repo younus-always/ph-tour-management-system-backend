@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from "mongoose"
 import { TErrorResponse, TErrorSources } from "../interfaces/err.types"
+import httpStatus from "http-status-codes";
 
 export const handleValidationError = (err: mongoose.Error.ValidationError): TErrorResponse => {
       const errorSources: TErrorSources[] = []
-
       const errors = Object.values(err.errors)
       errors.forEach((errorObject: any) => errorSources.push({
             path: errorObject.path,
@@ -12,8 +11,8 @@ export const handleValidationError = (err: mongoose.Error.ValidationError): TErr
       }))
 
       return {
-            statusCode: 400,
-            message: "Validation Error",
+            statusCode: httpStatus.BAD_REQUEST,
+            message: "Validation Error Occured!",
             errorSources
       }
 }

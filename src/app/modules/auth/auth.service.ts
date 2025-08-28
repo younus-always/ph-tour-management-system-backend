@@ -20,13 +20,13 @@ const resetPassword = async (oldPassword: string, newPassword: string, decodedTo
       const isOldPasswordMatch = await bcryptjs.compare(oldPassword, user!.password as string)
 
       if (!isOldPasswordMatch) {
-            throw new AppError(httpStatus.UNAUTHORIZED, "Old password does not matched")
-      }
-      user!.password = await bcryptjs.hash(newPassword, Number(envVars.BCRYPT_SALT_ROUND))
-      user!.save()
+            throw new AppError(httpStatus.UNAUTHORIZED, "Old password does not match.")
+      };
+      user!.password = await bcryptjs.hash(newPassword, Number(envVars.BCRYPT_SALT_ROUND));
+      user!.save();
 };
 
-export const AuthServices = {
+export const AuthService = {
       getNewAccessToken,
       resetPassword
 };

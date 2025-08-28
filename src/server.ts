@@ -8,12 +8,10 @@ import { seedSuperAdmin } from "./app/utils/seedSuperAdmin";
 
 let server: Server;
 
-
 const startServer = async () => {
       try {
             await mongoose.connect(envVars.DB_URL);
             console.log("Connected to DB")
-
             server = app.listen(envVars.PORT, () => {
                   console.log(`Server is listening on port ${envVars.PORT}`)
             })
@@ -24,7 +22,7 @@ const startServer = async () => {
 (async () => {
       await startServer()
       await seedSuperAdmin()
-})()
+})();
 
 process.on("SIGTERM", () => {
       console.log("SIGTERM signal received... Server Shutting Down....");
@@ -35,6 +33,17 @@ process.on("SIGTERM", () => {
             });
       }
       process.exit(1);
+});
+
+process.on("SIGINT", () => {
+      console.log("SIGINT Signal Received... Sever Shutting Down.")
+
+      if (server) {
+            server.close(() => {
+                  process.exit(1)
+            })
+      }
+      process.exit(1)
 });
 
 process.on("unhandledRejection", (err) => {
@@ -58,8 +67,3 @@ process.on("uncaughtException", (err) => {
       };
       process.exit(1);
 });
-
-//! Unhandle Rejection Error
-// Promise.reject(new Error("I forgot to catch this promise!"));
-//! Uncaught Exception Error
-// throw new Error("I forgot to handle this local error!");

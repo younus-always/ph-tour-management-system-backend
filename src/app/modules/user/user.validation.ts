@@ -3,21 +3,18 @@ import { IsActive, Role } from "./user.interface";
 
 export const createUserZodSchema = z.object({
       name: z
-            .string("Name is required")
-            .min(3, { error: "Name must be at least 3 characters long." })
-            .max(30, { error: "Name cannot exceed 30 characters." }),
-      email: z
-            .string({ error: "Email is required" })
-            .min(1, { error: "Email is required" })
-            .email({ error: "Invalid email address format." })
-            .min(5, { error: "Email must be at least 5 characters long." })
-            .max(100, { error: "Email cannot exceed 100 characters." }),
-
+            .string({ error: "Name is required!" })
+            .min(4, { error: "Name must be at least 4 characters long." })
+            .max(40, { error: "Name cannot exceed 40 characters." }),
+      email: z.email(),
       password: z
-            .string({ error: "Password is required" })
+            .string({ error: "Password is required!" })
             .min(8, { error: "Password must be at least 8 characters long." })
             .regex(/^(?=.*[A-Z])/, {
                   error: "Password must contain at least 1 uppercase letter.",
+            })
+            .regex(/^(?=.*[a-z])/, {
+                  error: "Password must contain at least 1 lowercase letter.",
             })
             .regex(/^(?=.*[!@#$%^&*])/, {
                   error: "Password must contain at least 1 special character.",
@@ -39,24 +36,17 @@ export const createUserZodSchema = z.object({
 
 export const updateUserZodSchema = z.object({
       name: z
-            .string({
-                  error: (issue) => issue.input === undefined
-                        ? "Name is required." : "Not a string"
-            })
+            .string({error:"Name is required!"})
             .min(3, { error: "Name must be at least 3 characters long." })
             .max(30, { error: "Name cannot exceed 30 characters." })
             .optional(),
       password: z
-            .string({
-                  error: (issue) => issue.input === undefined
-                        ? "Password is required."
-                        : issue.code === "invalid_type"
-                              ? "Password must be string."
-                              : "Not a string"
-            })
+            .string({ error: "Password is required" })
             .min(8, { error: "Password must be at least 8 characters long." })
             .regex(/^(?=.*[A-Z])/,
                   { error: "Password must contain at least 1 uppercase letter." })
+            .regex(/^(?=.*[a-z])/,
+                  { error: "Password must contain at least 1 lowercase letter." })
             .regex(/^(?=.*[!@#$%^&*])/,
                   { error: "Password must contain at least 1 special character." })
             .regex(/^(?=.*\d)/,

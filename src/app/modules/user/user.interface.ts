@@ -7,15 +7,9 @@ export enum Role {
       GUIDE = "GUIDE"
 };
 
-// auth proiders
-/**
-* email, password
-* google authentication
-**/
-
 export interface IAuthProvider {
-      provider: "google" | "creadentials";  // "Google", "Credential"
-      providerId: string
+      provider: "google" | "creadentials";
+      providerId: string;
 };
 
 export enum IsActive {
@@ -32,10 +26,10 @@ export interface IUser {
       phone?: string;
       picture?: string;
       address?: string;
+      role: Role;
       isActive?: IsActive;
       isVerified?: boolean;
       isDeleted?: boolean;
-      role: Role;
       auths: IAuthProvider[];
       bookings?: Types.ObjectId[];
       guides?: Types.ObjectId[]

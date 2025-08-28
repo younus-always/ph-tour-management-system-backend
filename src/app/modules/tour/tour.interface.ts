@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 
 export interface ITourType {
       name: string
-}
+};
 
 export interface ITour {
       title: string;
@@ -21,4 +21,4 @@ export interface ITour {
       minAge?: number;
       division: Types.ObjectId;
       tourType: Types.ObjectId
-}
+};

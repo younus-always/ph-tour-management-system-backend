@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Application, Request, Response } from "express";
 import cors from 'cors'
 import { router } from "./app/routes";
 import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
@@ -9,7 +9,7 @@ import expressSession from "express-session";
 import { envVars } from "./app/config/env";
 import "./app/config/passport";
 
-const app = express();
+const app: Application = express();
 
 // Middleware
 app.use(expressSession({
@@ -30,6 +30,7 @@ app.use("/api/v1", router);
 // main route
 app.get('/', (req: Request, res: Response) => {
       res.status(200).json({
+            sucees: true,
             message: "Welcome to Tour Management System Backend."
       })
 });
@@ -37,6 +38,6 @@ app.get('/', (req: Request, res: Response) => {
 // Global Error Handler
 app.use(globalErrorHandler);
 // Not Found Route
-app.use(notFound)
+app.use(notFound);
 
 export default app;
