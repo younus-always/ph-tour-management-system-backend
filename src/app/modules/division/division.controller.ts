@@ -29,8 +29,7 @@ const getAllDivisions = catchAsync(async (req: Request, res: Response) => {
 
 const updateDivision = catchAsync(async (req: Request, res: Response) => {
       const { id } = req.params;
-      const body = req.body;
-      const updatedDivision = await DivisionService.updateDivision(id, body);
+      const updatedDivision = await DivisionService.updateDivision(id, req.body);
 
       sendResponse(res, {
             success: true,
@@ -42,13 +41,13 @@ const updateDivision = catchAsync(async (req: Request, res: Response) => {
 
 const deleteDivision = catchAsync(async (req: Request, res: Response) => {
       const { id } = req.params;
-      await DivisionService.deleteDivision(id);
+      const result=await DivisionService.deleteDivision(id);
 
       sendResponse(res, {
             success: true,
             statusCode: httpStatus.OK,
             message: "Division deleted successfully.",
-            data: null
+            data: result
       })
 });
 

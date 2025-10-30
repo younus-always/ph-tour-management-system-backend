@@ -6,6 +6,6 @@ import { TErrorResponse } from "../interfaces/err.types"
 export const handleCastError = (err: mongoose.Error.CastError): TErrorResponse => {
       return {
             statusCode: httpStatus.BAD_REQUEST,
-            message: "Invalide MongoDB ObjectID. Please provide a valid id."
+            message: "Invalid MongoDB ObjectID. Please provide a valid id."
       }
 }

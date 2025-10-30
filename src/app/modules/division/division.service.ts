@@ -4,7 +4,11 @@ import { IDivision } from "./division.interface";
 import { Division } from "./division.model";
 
 const createDivision = async (payload: Partial<IDivision>) => {
-
+      const existingDivision = await Division.findOne({ name: payload.name });
+      if (existingDivision) {
+            throw new AppError(httpStatus.CONFLICT, "This name of division already exists.")
+      };
+      
       const division = await Division.create(payload);
       return division
 };
@@ -34,13 +38,13 @@ const updateDivision = async (id: string, payload: Partial<IDivision>) => {
             throw new AppError(httpStatus.CONFLICT, "This division is already exists.")
       };
 
-      const updatedDivision = await Division.findByIdAndUpdate(id, payload, { new: true, runValidators: true });
+           const updatedDivision = await Division.findByIdAndUpdate(id, payload, { new: true, runValidators: true });
       return updatedDivision;
 };
 
 const deleteDivision = async (divisionId: string) => {
       await Division.findByIdAndDelete(divisionId);
-      return true
+      return null
 };
 
 

@@ -36,7 +36,8 @@ export const globalErrorHandler = (err: any, req: Request, res: Response) => {
             statusCode = simplifiedError.statusCode
             message = simplifiedError.message
             errorSources = simplifiedError.errorSources as TErrorSources[]
-      } // Zod Error
+      } 
+      // Zod Error
       else if (err.name === "ZodError") {
             const simplifiedError = handleZodError(err)
             statusCode = simplifiedError.statusCode
