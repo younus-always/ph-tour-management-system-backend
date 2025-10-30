@@ -4,7 +4,7 @@ import { ITour, ITourType } from "./tour.interface";
 const tourTypeSchema = new Schema<ITourType>({
       name: { type: String, required: true, unique: true }
 }, {
-      versionKey:false,
+      versionKey: false,
       timestamps: true
 });
 export const TourType = model<ITourType>("TourType", tourTypeSchema);
@@ -18,6 +18,8 @@ const tourSchema = new Schema<ITour>({
       costFrom: { type: Number },
       startDate: { type: Date },
       endDate: { type: Date },
+      departureLocation: { type: String },
+      arrivalLocation: { type: String },
       included: { type: [String], default: [] },
       excluded: { type: [String], default: [] },
       amenities: { type: [String], default: [] },

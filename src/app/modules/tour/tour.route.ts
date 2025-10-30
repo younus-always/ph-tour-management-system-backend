@@ -24,12 +24,13 @@ router.delete("/tour-types/:id",
 );
 
 /*----------------- TOUR ROUTES ----------------*/
-router.get("/", TourController.getAllTours);
 router.post("/create",
       checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
       validateRequest(createTourZodSchema),
       TourController.createTour
 );
+router.get("/", TourController.getAllTours);
+router.get("/:slug", TourController.getSingleTour);
 router.patch("/:id",
       checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
       validateRequest(updateTourZodSchema),

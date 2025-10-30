@@ -61,9 +61,7 @@ const getAllTours = async (query: Record<string, string>) => {
             .filter()
             .sort()
             .fields()
-            .paginate();
-
-      // const meta = await queryBuilder.getMeta();
+            .pagination();
 
       const [data, meta] = await Promise.all([
             tours.build(),
@@ -71,6 +69,12 @@ const getAllTours = async (query: Record<string, string>) => {
       ]);
 
       return { data, meta }
+};
+
+const getSingleTour = async (slug: string) => {
+      const tour = await Tour.findOne({ slug });
+      if (!tour) throw new AppError(httpStatus.NOT_FOUND, "Tour Not Found");
+      return { data: tour }
 };
 
 
@@ -100,6 +104,7 @@ export const TourService = {
       deleteTourType,
       createTour,
       getAllTours,
+      getSingleTour,
       updateTour,
       deleteTour
 };

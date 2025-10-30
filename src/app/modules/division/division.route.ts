@@ -16,6 +16,9 @@ router.post("/create",
 router.get("/",
       DivisionController.getAllDivisions
 );
+router.get("/:slug",
+      DivisionController.getSingleDivision
+);
 router.patch("/:id",
       validateRequest(updateDivisionSchema),
       checkAuth(Role.ADMIN, Role.SUPER_ADMIN),

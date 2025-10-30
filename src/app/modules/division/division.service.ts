@@ -2,27 +2,40 @@ import httpStatus from 'http-status-codes';
 import AppError from "../../errorHelpers/AppError";
 import { IDivision } from "./division.interface";
 import { Division } from "./division.model";
+import { QueryBuilder } from '../../utils/QueryBuilder';
+import { divisionSearchableFields } from './division.constant';
 
 const createDivision = async (payload: Partial<IDivision>) => {
       const existingDivision = await Division.findOne({ name: payload.name });
       if (existingDivision) {
             throw new AppError(httpStatus.CONFLICT, "This name of division already exists.")
       };
-      
+
       const division = await Division.create(payload);
       return division
 };
 
-const getAllDivisions = async () => {
-      const divisions = await Division.find();
-      const totalDivision = await Division.countDocuments();
+const getAllDivisions = async (query: Record<string, string>) => {
+      const queryBuilder = new QueryBuilder(Division.find(), query);
+      const division = queryBuilder
+            .search(divisionSearchableFields)
+            .filter()
+            .sort()
+            .fields()
+            .pagination();
 
-      return {
-            data: divisions,
-            meta: {
-                  total: totalDivision
-            }
-      }
+      const [data, meta] = await Promise.all([
+            division.build(),
+            queryBuilder.getMeta()
+      ]);
+
+      return { data, meta }
+};
+
+const getSingleDivision = async (slug: string) => {
+      const division = await Division.findOne({ slug });
+      if (!division) throw new AppError(httpStatus.NOT_FOUND, "Division Not Found");
+      return { data: division }
 };
 
 const updateDivision = async (id: string, payload: Partial<IDivision>) => {
@@ -38,7 +51,7 @@ const updateDivision = async (id: string, payload: Partial<IDivision>) => {
             throw new AppError(httpStatus.CONFLICT, "This division is already exists.")
       };
 
-           const updatedDivision = await Division.findByIdAndUpdate(id, payload, { new: true, runValidators: true });
+      const updatedDivision = await Division.findByIdAndUpdate(id, payload, { new: true, runValidators: true });
       return updatedDivision;
 };
 
@@ -51,6 +64,7 @@ const deleteDivision = async (divisionId: string) => {
 export const DivisionService = {
       createDivision,
       getAllDivisions,
+      getSingleDivision,
       updateDivision,
       deleteDivision
 };
