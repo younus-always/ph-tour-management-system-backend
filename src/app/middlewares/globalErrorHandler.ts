@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextFunction, Request, Response } from "express"
+import { Request, Response } from "express"
 import { envVars } from "../config/env"
 import AppError from "../errorHelpers/AppError";
+import httpStatus from "http-status-codes";
 import { handleDuplicateError } from "../helpers/handleDuplicateError";
 import { handleCastError } from "../helpers/handleCastError";
 import { handleZodError } from "../helpers/handleZodError";
@@ -10,13 +9,13 @@ import { handleValidationError } from "../helpers/handleValidationError";
 import { TErrorSources } from "../interfaces/err.types";
 
 
-export const globalErrorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
-      // if (envVars.NODE_ENV === "development") {
-      //       console.log("From globalErrorHandler:", err)
-      // }
+export const globalErrorHandler = (err: any, req: Request, res: Response) => {
+      if (envVars.NODE_ENV === "development") {
+            console.log("From Global Error Handler:", err)
+      }
 
       let errorSources: TErrorSources[] = [];
-      let statusCode = 500;
+      let statusCode = httpStatus.INTERNAL_SERVER_ERROR;
       let message = "Something Went Wrong!";
 
       // Duplicate Error
@@ -31,16 +30,16 @@ export const globalErrorHandler = (err: any, req: Request, res: Response, next: 
             statusCode = simplifiedError.statusCode
             message = simplifiedError.message
       }
-      // Zod Error
-      else if (err.name === "ZodError") {
-            const simplifiedError = handleZodError(err)
-            statusCode = simplifiedError.statusCode
-            message = simplifiedError.message
-            errorSources = simplifiedError.errorSources as TErrorSources[]
-      }
       // Mongoose Validation Error
       else if (err.name === "ValidationError") {
             const simplifiedError = handleValidationError(err)
+            statusCode = simplifiedError.statusCode
+            message = simplifiedError.message
+            errorSources = simplifiedError.errorSources as TErrorSources[]
+      } 
+      // Zod Error
+      else if (err.name === "ZodError") {
+            const simplifiedError = handleZodError(err)
             statusCode = simplifiedError.statusCode
             message = simplifiedError.message
             errorSources = simplifiedError.errorSources as TErrorSources[]
@@ -48,7 +47,7 @@ export const globalErrorHandler = (err: any, req: Request, res: Response, next: 
             statusCode = err.statusCode
             message = err.message
       } else if (err instanceof Error) {
-            statusCode = 500
+            statusCode = httpStatus.INTERNAL_SERVER_ERROR
             message = err.message
       }
 

@@ -10,6 +10,8 @@ export default tseslint.config(
       {
             rules: {
                   "no-console": "warn",
+                  "@typescript-eslint/no-unused-vars": "error",
+                  "@typescript-eslint/no-explicit-any": "warn"
             }
       }
 );

@@ -8,15 +8,18 @@ import { JwtPayload } from "jsonwebtoken";
 
 const createUser = async (payload: Partial<IUser>) => {
       const { email, password, ...rest } = payload;
-      const isUserExist = await User.findOne({ email })
+      // const userExist = await User.findOne({ email })
 
-      // if (isUserExist) {
-      //       throw new AppError(httpStatus.BAD_REQUEST, "User Already Exist")
+      // if (userExist) {
+            // throw new AppError(httpStatus.CONFLICT, "User Already Exists.")
       // }
 
-      const hashPassword = await bcryptjs.hash(password as string, Number(envVars.BCRYPT_SALT_ROUND))
+      const hashPassword = await bcryptjs.hash(password as string, Number(envVars.BCRYPT_SALT_ROUND));
 
-      const authProvider: IAuthProvider = { provider: "creadentials", providerId: email as string }
+      const authProvider: IAuthProvider = {
+            provider: "creadentials",
+            providerId: email as string
+      };
 
       const user = await User.create({
             email,
@@ -28,25 +31,25 @@ const createUser = async (payload: Partial<IUser>) => {
 };
 
 const updateUser = async (userId: string, payload: Partial<IUser>, decodedToken: JwtPayload) => {
-
-      const isUserExist = await User.findById(userId)
+      const isUserExist = await User.findById(userId);
+      const restrictedRoles = [Role.USER, Role.GUIDE];
 
       if (!isUserExist) {
-            throw new AppError(httpStatus.NOT_FOUND, "User Not Found")
+            throw new AppError(httpStatus.NOT_FOUND, "User Not Found.")
       }
 
       if (payload.role) {
-            if (decodedToken.role === Role.USER || decodedToken.role === Role.GUIDE) {
-                  throw new AppError(httpStatus.FORBIDDEN, "You are not authorized")
+            if (restrictedRoles.includes(decodedToken.role)) {
+                  throw new AppError(httpStatus.FORBIDDEN, "You do not have permission to change roles.")
             }
-            if (payload.role === Role.SUPER_ADMIN && decodedToken.role === Role.ADMIN) {
-                  throw new AppError(httpStatus.FORBIDDEN, "You are not authorized")
+            if (decodedToken.role === Role.ADMIN && payload.role === Role.SUPER_ADMIN) {
+                  throw new AppError(httpStatus.FORBIDDEN, "Admins cannot assign SUPER_ADMIN role.")
             }
       };
 
       if (payload.isActive || payload.isDeleted || payload.isVerified) {
-            if (decodedToken.role === Role.USER || decodedToken.role === Role.GUIDE) {
-                  throw new AppError(httpStatus.FORBIDDEN, "You are not authorized")
+            if (restrictedRoles.includes(decodedToken.role)) {
+                  throw new AppError(httpStatus.FORBIDDEN, "You do not have permission to change user status flags.")
             }
       };
 
@@ -56,8 +59,8 @@ const updateUser = async (userId: string, payload: Partial<IUser>, decodedToken:
       };
 
       // finally update user
-      const newUpdateUser = await User.findByIdAndUpdate(userId, payload, { new: true, runValidators: true })
-      return newUpdateUser
+      const updatedUser = await User.findByIdAndUpdate(userId, payload, { new: true, runValidators: true });
+      return updatedUser
 };
 
 const getAllUsers = async () => {
@@ -70,9 +73,9 @@ const getAllUsers = async () => {
                   total: totalUser
             }
       };
-}
+};
 
-export const UserServices = {
+export const UserService = {
       createUser,
       updateUser,
       getAllUsers

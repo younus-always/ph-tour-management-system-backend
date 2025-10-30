@@ -11,7 +11,7 @@ export const seedSuperAdmin = async () => {
                   console.log("Super Admin Already Exist")
                   return;
             }
-            console.log("Trying to create super admin")
+            console.log("Trying to create super admin...")
 
             const hashPassword = await bcryptjs.hash(envVars.SUPER_ADMIN_PASSWORD, Number(envVars.BCRYPT_SALT_ROUND))
 
@@ -21,7 +21,7 @@ export const seedSuperAdmin = async () => {
             }
 
             const payload = {
-                  name: "Super admin",
+                  name: "Super Admin",
                   role: Role.SUPER_ADMIN,
                   email: envVars.SUPER_ADMIN_EMAIL,
                   password: hashPassword,
@@ -30,8 +30,7 @@ export const seedSuperAdmin = async () => {
             }
 
             const superAdmin = await User.create(payload)
-            console.log("Super admin created successfully")
-            console.log(superAdmin)
+            console.log("Super Admin created successfully.", superAdmin)
       } catch (error) {
             console.log(error)
       }

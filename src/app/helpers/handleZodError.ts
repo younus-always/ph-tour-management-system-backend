@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import httpStatus from "http-status-codes";
 import { TErrorResponse, TErrorSources } from "../interfaces/err.types";
 
 export const handleZodError = (err: any): TErrorResponse => {
@@ -14,8 +14,8 @@ export const handleZodError = (err: any): TErrorResponse => {
       });
 
       return {
-            statusCode: 400,
-            message: "Zod Error",
+            statusCode: httpStatus.BAD_REQUEST,
+            message: "Zod Error Occured!",
             errorSources
       }
 }

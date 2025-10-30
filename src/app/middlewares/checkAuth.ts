@@ -12,29 +12,28 @@ export const checkAuth = (...authRoles: string[]) => async (req: Request, res: R
             const accessToken = req.headers.authorization
 
             if (!accessToken) {
-                  throw new AppError(403, "No Token Access")
+                  throw new AppError(httpStatus.UNAUTHORIZED, "JWT Token Missing")
             };
 
             const verifiedToken = verifyToken(accessToken, envVars.JWT_ACCESS_SECRET) as JwtPayload;
             const isUserExist = await User.findOne({ email: verifiedToken.email })
 
             if (!isUserExist) {
-                  throw new AppError(httpStatus.BAD_REQUEST, "User does not exist")
+                  throw new AppError(httpStatus.NOT_FOUND, "User does not exist.")
             };
             if (isUserExist.isActive === IsActive.BLOCKED || isUserExist.isActive === IsActive.INACTIVE) {
-                  throw new AppError(httpStatus.BAD_REQUEST, `User is ${isUserExist.isActive}`)
+                  throw new AppError(httpStatus.FORBIDDEN, `User account is ${isUserExist.isActive}`)
             };
             if (isUserExist.isDeleted) {
-                  throw new AppError(httpStatus.BAD_REQUEST, "User is deleted")
+                  throw new AppError(httpStatus.FORBIDDEN, "User account is deleted")
             };
 
             if (!authRoles.includes(verifiedToken.role)) {
-                  throw new AppError(403, "You are not permitted to view this route!!!")
+                  throw new AppError(httpStatus.FORBIDDEN, "Access denied: insufficient permissions.")
             };
             req.user = verifiedToken
             next()
       } catch (error) {
-            console.log("jwt err:", error)
             next(error)
       }
-}
+};

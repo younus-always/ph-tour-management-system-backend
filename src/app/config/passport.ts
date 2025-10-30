@@ -15,26 +15,25 @@ passport.use(
       }, async (email: string, password: string, done) => {
             try {
 
-                  const isUserExist = await User.findOne({ email })
-                  if (!isUserExist) {
-                        return done(null, false, { message: "User does not exist" })
+                  const user = await User.findOne({ email })
+                  if (!user) {
+                        return done(null, false, { message: "User does not exists." })
                   }
 
-                  const isGoogleAuthenticated = isUserExist.auths.some(providerObjects => providerObjects.provider === "google"
+                  const googleAuthenticated = user.auths.some(providerObjects => providerObjects.provider === "google"
                   );
 
-                  if (isGoogleAuthenticated && !isUserExist.password) {
+                  if (googleAuthenticated && !user.password) {
                         return done(null, false, { message: "You have authenticated through Google. So if you want to login with credentials, then at first login with google and set a password for your Gmail and then you can login with email and password." })
                   }
 
-                  const isPasswordMatched = await bcryptjs.compare(password, isUserExist.password as string)
-                  if (!isPasswordMatched) {
-                        return done(null, false, { message: "Password does not match" })
+                  const isPasswordMatch = await bcryptjs.compare(password, user.password as string)
+                  if (!isPasswordMatch) {
+                        return done(null, false, { message: "Password does not match." })
                   }
 
-                  return done(null, isUserExist)
+                  return done(null, user)
             } catch (error) {
-                  console.log(error)
                   done(error)
             }
       })
@@ -52,7 +51,7 @@ passport.use(
                         const email = profile.emails?.[0].value
 
                         if (!email) {
-                              return done(null, false, { message: "Email not found" })
+                              return done(null, false, { message: "Email not found!" })
                         };
 
                         let user = await User.findOne({ email })
@@ -74,9 +73,7 @@ passport.use(
                         };
 
                         return done(null, user)
-
                   } catch (error) {
-                        console.log("Google Strategy Error:", error)
                         return done(error)
                   }
             }
@@ -89,16 +86,15 @@ passport.use(
 //Custom -> email , password, role : USER, name... -> registration -> DB -> 1 User create
 //Google -> req -> google -> successful : Jwt Token : Role , email -> DB - Store -> token - api access
 
-passport.serializeUser((user: any, done: (err: any, id?: unknown) => void) => {
+passport.serializeUser((user: any, done) => {
       done(null, user._id)
 });
 
-passport.deserializeUser(async (id: string, done: any) => {
+passport.deserializeUser(async (id: string, done) => {
       try {
             const user = await User.findById(id)
             done(null, user)
       } catch (error) {
-            console.log(error)
             done(error)
       }
 });
