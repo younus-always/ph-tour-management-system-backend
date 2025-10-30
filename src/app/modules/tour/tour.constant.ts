@@ -1,1 +1,1 @@
-export const searchableFields = ["title", "description", "location"];
+export const tourSearchableFields = ["title", "description", "location"];
