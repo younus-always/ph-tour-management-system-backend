@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import AppError from "../../errorHelpers/AppError";
 import { PAYMENT_STATUS } from "../payment/payment.interface";
 import { Payment } from "../payment/payment.model";
+import { ISSLCommerz } from "../sslCommerz/sslCommerz.interface";
+import { SSLService } from "../sslCommerz/sslCommerz.service";
 import { Tour } from "../tour/tour.model";
 import { User } from "../user/user.model";
 import { BOOKING_STATUS, IBooking } from "./booking.interface";
@@ -52,10 +55,28 @@ const createBooking = async (payload: Partial<IBooking>, userId: string) => {
                   .populate("tour", "title description location costFrom")
                   .populate("payment");;
 
+            const userName = (updatedBooking?.user as any).name
+            const userEmail = (updatedBooking?.user as any).email
+            const userPhone = (updatedBooking?.user as any).phone
+            const userAddress = (updatedBooking?.user as any).address
+
+            const sslPayload: ISSLCommerz = {
+                  name: userName,
+                  email: userEmail,
+                  phoneNumber: userPhone,
+                  address: userAddress,
+                  amount: amount,
+                  transactionId: transactionId
+            }
+            const sslPayment = await SSLService.sslPaymentInit(sslPayload)
 
             await session.commitTransaction();  // transaction
             session.endSession();
-            return updatedBooking;
+
+            return {
+                  paymentURL: sslPayment.GatewayPageURL,
+                  booking: updatedBooking
+            };
       } catch (error) {
             await session.abortTransaction();  // rollback
             session.endSession();
