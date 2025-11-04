@@ -1,4 +1,6 @@
-import { Request, Response } from "express"
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { NextFunction, Request, Response } from "express"
 import { envVars } from "../config/env"
 import AppError from "../errorHelpers/AppError";
 import httpStatus from "http-status-codes";
@@ -9,14 +11,14 @@ import { handleValidationError } from "../helpers/handleValidationError";
 import { TErrorSources } from "../interfaces/err.types";
 
 
-export const globalErrorHandler = (err: any, req: Request, res: Response) => {
+export const globalErrorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
       if (envVars.NODE_ENV === "development") {
             console.log("From Global Error Handler:", err)
       }
 
-      let errorSources: TErrorSources[] = [];
       let statusCode = httpStatus.INTERNAL_SERVER_ERROR;
       let message = "Something Went Wrong!";
+      let errorSources: TErrorSources[] = [];
 
       // Duplicate Error
       if (err.code === 11000) {
@@ -36,7 +38,7 @@ export const globalErrorHandler = (err: any, req: Request, res: Response) => {
             statusCode = simplifiedError.statusCode
             message = simplifiedError.message
             errorSources = simplifiedError.errorSources as TErrorSources[]
-      } 
+      }
       // Zod Error
       else if (err.name === "ZodError") {
             const simplifiedError = handleZodError(err)
