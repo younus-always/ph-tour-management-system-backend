@@ -6,6 +6,8 @@ import { User } from "../modules/user/user.model";
 import { Role } from "../modules/user/user.interface";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcryptjs from 'bcryptjs';
+import { IsActive } from './../modules/user/user.interface';
+import AppError from "../errorHelpers/AppError";
 
 
 passport.use(
@@ -18,7 +20,17 @@ passport.use(
                   const user = await User.findOne({ email })
                   if (!user) {
                         return done(null, false, { message: "User does not exists." })
-                  }
+                  };
+
+                  if (!user.isVerified) {
+                        done("User account is not verified")
+                  };
+                  if (user.isActive === IsActive.BLOCKED || user.isActive === IsActive.INACTIVE) {
+                        done(`User account is ${user.isActive}`)
+                  };
+                  if (user.isDeleted) {
+                        throw new AppError(404, "User account is deleted")
+                  };
 
                   const googleAuthenticated = user.auths.some(providerObjects => providerObjects.provider === "google"
                   );
@@ -56,10 +68,20 @@ passport.use(
 
                         let user = await User.findOne({ email })
 
+                        if (user && !user.isVerified) {
+                              return done(null, false, { message: "User is not verified" })
+                        };
+                        if (user && (user.isActive === IsActive.BLOCKED || user.isActive === IsActive.INACTIVE)) {
+                              done(`User account is ${user.isActive}`)
+                        };
+                        if (user && user.isDeleted) {
+                              return done(null, false, { message: "User is Deleted" })
+                        };
+
                         if (!user) {
                               user = await User.create({
-                                    name: profile.displayName,
                                     email,
+                                    name: profile.displayName,
                                     picture: profile.photos?.[0].value,
                                     role: Role.USER,
                                     isVerified: true,
