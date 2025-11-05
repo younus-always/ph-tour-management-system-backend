@@ -4,6 +4,7 @@ import { IDivision } from "./division.interface";
 import { Division } from "./division.model";
 import { QueryBuilder } from '../../utils/QueryBuilder';
 import { divisionSearchableFields } from './division.constant';
+import { deleteImageFromCloudinary } from '../../config/multer.config';
 
 const createDivision = async (payload: Partial<IDivision>) => {
       const existingDivision = await Division.findOne({ name: payload.name });
@@ -40,7 +41,7 @@ const getSingleDivision = async (slug: string) => {
 
 const updateDivision = async (id: string, payload: Partial<IDivision>) => {
       const existingDivision = await Division.findById(id);
-      if (existingDivision) {
+      if (!existingDivision) {
             throw new AppError(httpStatus.NOT_FOUND, "Division not found!")
       };
       const duplicateDivision = await Division.findOne({
@@ -52,6 +53,10 @@ const updateDivision = async (id: string, payload: Partial<IDivision>) => {
       };
 
       const updatedDivision = await Division.findByIdAndUpdate(id, payload, { new: true, runValidators: true });
+
+      if (payload.thumbnail && existingDivision.thumbnail) {
+            await deleteImageFromCloudinary(existingDivision.thumbnail)
+      }
       return updatedDivision;
 };
 
