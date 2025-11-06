@@ -1,9 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { uploadBufferToCloudinary } from "../../config/multer.config";
 import AppError from "../../errorHelpers/AppError";
+import { generatePDF, IInvoiceData } from "../../utils/invoice";
+import { sendEmail } from "../../utils/sendEmail";
 import { BOOKING_STATUS } from "../booking/booking.interface";
 import { Booking } from "../booking/booking.model";
 import { ISSLCommerz } from "../sslCommerz/sslCommerz.interface";
 import { SSLService } from "../sslCommerz/sslCommerz.service";
+import { ITour } from "../tour/tour.interface";
+import { IUser } from "../user/user.interface";
 import { PAYMENT_STATUS } from "./payment.interface";
 import { Payment } from "./payment.model";
 
@@ -35,7 +40,7 @@ const initPayment = async (bookingId: string) => {
       return {
             paymentURL: sslPayment.GatewayPageURL
       }
-}
+};
 
 const successPayment = async (query: Record<string, string>) => {
       const session = await Booking.startSession();
@@ -46,12 +51,56 @@ const successPayment = async (query: Record<string, string>) => {
                   status: PAYMENT_STATUS.PAID
             }, { session });
 
-            await Booking
+            const updatedBooking = await Booking
                   .findByIdAndUpdate(
                         updatedPayment?.booking,
                         { status: BOOKING_STATUS.COMPLETE },
-                        { runValidators: true, session }
-                  )
+                        { new: true, runValidators: true, session }
+                  ).populate("tour", "title")
+                  .populate("user", "name email");
+
+            if (!updatedBooking) {
+                  throw new AppError(404, "Booking Not Found")
+            }
+            if (!updatedPayment) {
+                  throw new AppError(404, "Payment Not Found")
+            }
+
+            const invoiceData: IInvoiceData = {
+                  bookingDate: updatedBooking.createdAt as Date,
+                  guestCount: updatedBooking.guestCount,
+                  totalAmount: updatedPayment.amount,
+                  tourTitle: (updatedBooking.tour as unknown as ITour).title,
+                  transactionId: updatedPayment.transactionId,
+                  userName: (updatedBooking.user as unknown as IUser).name,
+                  paymentId: updatedPayment._id,
+            };
+            // generate payment invoice pdf
+            const pdfBuffer = await generatePDF(invoiceData);
+            // upload pdf to cloudinary
+            const cloudinaryResult = await uploadBufferToCloudinary(pdfBuffer, "invoice");
+
+            if (!cloudinaryResult) {
+                  throw new AppError(401, "Error uploading pdf.")
+            }
+            // update payment invoiceUrl
+            await Payment.findOneAndUpdate(updatedPayment._id,
+                  { invoiceUrl: cloudinaryResult.secure_url },
+                  { runValidators: true, session })
+
+            await sendEmail({
+                  to: (updatedBooking.user as unknown as IUser).email,
+                  subject: "Your Booking Invoice",
+                  templateName: "invoice",
+                  templateData: invoiceData,
+                  attachments: [
+                        {
+                              filename: "invoice.pdf",
+                              content: pdfBuffer,
+                              contentType: "application/pdf"
+                        }
+                  ]
+            });
 
             await session.commitTransaction();  // transaction
             session.endSession();
@@ -118,10 +167,25 @@ const cancelPayment = async (query: Record<string, string>) => {
       }
 };
 
+const getInvoiceDownloadUrl = async (paymentId: string) => {
+      const payment = await Payment.findById(paymentId).select("invoiceUrl");
+
+      if (!payment) {
+            throw new AppError(404, "Payment not found")
+      }
+
+      if (!payment.invoiceUrl) {
+            throw new AppError(404, "No invoice found")
+      }
+
+      return payment;
+};
+
 
 export const PaymentService = {
       initPayment,
       successPayment,
       failPayment,
-      cancelPayment
+      cancelPayment,
+      getInvoiceDownloadUrl
 };

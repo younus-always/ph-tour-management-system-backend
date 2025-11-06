@@ -1,8 +1,10 @@
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { cloudinaryUpload } from "./cloudinary.config";
 import multer from "multer";
-import { v2 as cloudinary } from "cloudinary";
+import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
 import AppError from "../errorHelpers/AppError";
+import stream from "stream";
+
 
 const storage = new CloudinaryStorage({
       cloudinary: cloudinaryUpload,
@@ -34,6 +36,34 @@ export const deleteImageFromCloudinary = async (url: string) => {
             }
       } catch (error: any) {
             throw new AppError(400, "Cloudinary Image Deletion Failed", error.message)
+      }
+};
+
+export const uploadBufferToCloudinary = async (buffer: Buffer, fileName: string): Promise<UploadApiResponse | undefined> => {
+      try {
+            return new Promise((resolve, reject) => {
+                  const public_id = `pdf/${fileName}-${Date.now()}`;
+                  const bufferStream = new stream.PassThrough();
+                  bufferStream.end(buffer);
+
+                  cloudinary.uploader.upload_stream(
+                        {
+                              resource_type: "auto",
+                              public_id: public_id,
+                              folder: "pdf"
+                        },
+                        (err, result) => {
+                              if (err) {
+                                    return reject(err)
+                              }
+                              resolve(result)
+                        }
+                  ).end(buffer)
+            })
+
+      } catch (error: any) {
+            console.log(error);
+            throw new AppError(401, `Error uploading file ${error.message}`)
       }
 };
 
