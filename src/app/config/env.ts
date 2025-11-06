@@ -40,17 +40,21 @@ interface EnvConfig {
             SMTP_USER: string;
             SMTP_PASS: string;
             SMTP_FROM: string;
-      }
+      },
+      REDIS_USERNAME: string;
+      REDIS_PASSWORD: string;
+      REDIS_PORT: string;
+      REDIS_HOST: string;
 };
 
 const loadEnvVariable = (): EnvConfig => {
-      const requireEnvVariables: string[] = ["PORT", "DB_URL", "NODE_ENV", "BCRYPT_SALT_ROUND", "JWT_ACCESS_SECRET", "JWT_ACCESS_EXPIRES", "SUPER_ADMIN_EMAIL", "SUPER_ADMIN_EMAIL", "JWT_REFRESH_SECRET", "JWT_REFRESH_SECRET", "GOOGLE_CALLBACK_URL", "GOOGLE_CLIENT_SECRET", "GOOGLE_CLIENT_ID", "EXPRESS_SESSION_SECRET", "FRONTEND_URL", "SSL_STORE_ID", "SSL_STORE_PASS", "SSL_PAYMENT_API", "SSL_VALIDATION_API", "SSL_SUCCESS_BACKEND_URL", "SSL_FAIL_BACKEND_URL", "SSL_CANCEL_BACKEND_URL", "SSL_SUCCESS_FRONTEND_URL", "SSL_FAIL_FRONTEND_URL", "SSL_CANCEL_FRONTEND_URL", "CLOUDINARY_CLOUD", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET", "SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS", "SMTP_FROM"]
+      const requireEnvVariables: string[] = ["PORT", "DB_URL", "NODE_ENV", "BCRYPT_SALT_ROUND", "JWT_ACCESS_SECRET", "JWT_ACCESS_EXPIRES", "SUPER_ADMIN_EMAIL", "SUPER_ADMIN_EMAIL", "JWT_REFRESH_SECRET", "JWT_REFRESH_SECRET", "GOOGLE_CALLBACK_URL", "GOOGLE_CLIENT_SECRET", "GOOGLE_CLIENT_ID", "EXPRESS_SESSION_SECRET", "FRONTEND_URL", "SSL_STORE_ID", "SSL_STORE_PASS", "SSL_PAYMENT_API", "SSL_VALIDATION_API", "SSL_SUCCESS_BACKEND_URL", "SSL_FAIL_BACKEND_URL", "SSL_CANCEL_BACKEND_URL", "SSL_SUCCESS_FRONTEND_URL", "SSL_FAIL_FRONTEND_URL", "SSL_CANCEL_FRONTEND_URL", "CLOUDINARY_CLOUD", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET", "SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS", "SMTP_FROM", "REDIS_USERNAME", "REDIS_PASSWORD", "REDIS_PORT", "REDIS_HOST"]
 
-            requireEnvVariables.forEach((key) => {
-                  if (!process.env[key]) {
-                        throw new Error(`Missing require environment variable ${key}`)
-                  }
-            })
+      requireEnvVariables.forEach((key) => {
+            if (!process.env[key]) {
+                  throw new Error(`Missing require environment variable ${key}`)
+            }
+      })
       return {
             PORT: process.env.PORT as string,
             DB_URL: process.env.DB_URL as string,
@@ -91,7 +95,11 @@ const loadEnvVariable = (): EnvConfig => {
                   SMTP_USER: process.env.SMTP_USER as string,
                   SMTP_PASS: process.env.SMTP_PASS as string,
                   SMTP_FROM: process.env.SMTP_FROM as string,
-            }
+            },
+            REDIS_USERNAME: process.env.REDIS_USERNAME as string,
+            REDIS_PASSWORD: process.env.REDIS_PASSWORD as string,
+            REDIS_PORT: process.env.REDIS_PORT as string,
+            REDIS_HOST: process.env.REDIS_HOST as string,
       }
 }
 
