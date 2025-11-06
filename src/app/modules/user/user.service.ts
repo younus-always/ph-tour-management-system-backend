@@ -34,31 +34,35 @@ const updateUser = async (userId: string, payload: Partial<IUser>, decodedToken:
       const isUserExist = await User.findById(userId);
       const restrictedRoles = [Role.USER, Role.GUIDE];
 
+      if (restrictedRoles.includes(decodedToken.role)) {
+            if (userId !== decodedToken.userId) {
+                  throw new AppError(httpStatus.UNAUTHORIZED, "You are not authorized.")
+            }
+      }
+
       if (!isUserExist) {
             throw new AppError(httpStatus.NOT_FOUND, "User Not Found.")
       }
 
+      // admin cannot to update super-admin role
+      if (decodedToken.role === Role.ADMIN && payload.role === Role.SUPER_ADMIN) {
+            throw new AppError(httpStatus.UNAUTHORIZED, "You are not authorized. Admin cannot assign SUPER_ADMIN role.")
+      };
+
+      // without admin or super-admin cannot change role 
       if (payload.role) {
             if (restrictedRoles.includes(decodedToken.role)) {
-                  throw new AppError(httpStatus.FORBIDDEN, "You do not have permission to change roles.")
-            }
-            if (decodedToken.role === Role.ADMIN && payload.role === Role.SUPER_ADMIN) {
-                  throw new AppError(httpStatus.FORBIDDEN, "Admins cannot assign SUPER_ADMIN role.")
+                  throw new AppError(httpStatus.FORBIDDEN, "You do not have permission to change role.")
             }
       };
 
+      // cannot update status flags without admin or super-admin
       if (payload.isActive || payload.isDeleted || payload.isVerified) {
             if (restrictedRoles.includes(decodedToken.role)) {
                   throw new AppError(httpStatus.FORBIDDEN, "You do not have permission to change user status flags.")
             }
       };
 
-      // Re-hashing password
-      if (payload.password) {
-            payload.password = await bcryptjs.hash(payload.password, Number(envVars.BCRYPT_SALT_ROUND))
-      };
-
-      // finally update user
       const updatedUser = await User.findByIdAndUpdate(userId, payload, { new: true, runValidators: true });
       return updatedUser
 };

@@ -32,5 +32,6 @@ export interface IUser {
       isDeleted?: boolean;
       auths: IAuthProvider[];
       bookings?: Types.ObjectId[];
-      guides?: Types.ObjectId[]
+      guides?: Types.ObjectId[];
+      createdAt?: Date;
 };
