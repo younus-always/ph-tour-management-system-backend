@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only ./src/server",
+    "start": "node ./dist/server.js",
     "build": "tsc",
     "lint": "npx eslint src",
     "lint:fix": "npx eslint src --fix",
