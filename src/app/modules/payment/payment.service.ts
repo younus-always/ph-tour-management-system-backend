@@ -12,13 +12,6 @@ import { IUser } from "../user/user.interface";
 import { PAYMENT_STATUS } from "./payment.interface";
 import { Payment } from "./payment.model";
 
-export interface ICloudinaryResult {
-      url: string;
-      secure_url: string;
-      asset_folder: string;
-      display_name: string;
-      original_filename: string;
-};
 
 const initPayment = async (bookingId: string) => {
       const payment = await Payment.findOne({ booking: bookingId });
@@ -47,7 +40,7 @@ const initPayment = async (bookingId: string) => {
       return {
             paymentURL: sslPayment.GatewayPageURL
       }
-}
+};
 
 const successPayment = async (query: Record<string, string>) => {
       const session = await Booking.startSession();

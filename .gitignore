@@ -1,5 +1,5 @@
-node_modules
 .vscode
 .env
 dist
 .vercel
+node_modules
